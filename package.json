@@ -24,12 +24,14 @@
     "@nestjs/websockets": "^4.5.8",
     "amqplib": "^0.5.2",
     "body-parser": "^1.18.2",
+    "orientjs": "^2.2.7",
     "reflect-metadata": "^0.1.10",
     "rxjs": "^5.5.6"
   },
   "devDependencies": {
     "@types/amqplib": "^0.5.6",
     "@types/body-parser": "^1.16.8",
+    "@types/orientjs": "^3.0.3",
     "typescript": "^2.6.2"
   }
 }
