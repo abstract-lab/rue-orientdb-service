@@ -1,0 +1,19 @@
+{
+  "name": "rue-orientdb-service",
+  "version": "1.0.0",
+  "description": "This service reads and writes data from/to an OrientDb database. Also receives and sends messages via a MQ",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abstract-lab/rue-orientdb-service.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abstract-lab/rue-orientdb-service/issues"
+  },
+  "homepage": "https://github.com/abstract-lab/rue-orientdb-service#readme"
+}
