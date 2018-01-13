@@ -15,5 +15,21 @@
   "bugs": {
     "url": "https://github.com/abstract-lab/rue-orientdb-service/issues"
   },
-  "homepage": "https://github.com/abstract-lab/rue-orientdb-service#readme"
+  "homepage": "https://github.com/abstract-lab/rue-orientdb-service#readme",
+  "dependencies": {
+    "@nestjs/common": "^4.5.9",
+    "@nestjs/core": "^4.5.9",
+    "@nestjs/microservices": "^4.5.8",
+    "@nestjs/testing": "^4.5.5",
+    "@nestjs/websockets": "^4.5.8",
+    "amqplib": "^0.5.2",
+    "body-parser": "^1.18.2",
+    "reflect-metadata": "^0.1.10",
+    "rxjs": "^5.5.6"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.5.6",
+    "@types/body-parser": "^1.16.8",
+    "typescript": "^2.6.2"
+  }
 }
