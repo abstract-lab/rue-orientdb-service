@@ -1,4 +1,4 @@
-import { Server } from 'orientjs';
+import { Server, Record } from 'orientjs';
 import { Component } from '@nestjs/common';
 
 @Component()
