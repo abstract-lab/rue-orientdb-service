@@ -27,12 +27,10 @@ export class RabbitMessageQueue {
         }
     }
 
-    public async sendMessage(routingKey: string, content: any, headers: {}): Promise<boolean> {
+    public async sendMessage(routingKey: string, msg: amqp.Message): Promise<boolean> {
         let result = false;
 
-        result = this.channel.publish(this.exchange, routingKey, new Buffer(JSON.stringify(content)), {
-            headers: headers
-        });
+        result = this.channel.publish(this.exchange, routingKey, msg.content, msg.properties);
 
         return Promise.resolve(result);
     }

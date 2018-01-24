@@ -1,3 +1,5 @@
+import * as amqp from 'amqplib';
+
 import { Publisher } from '../common/publisher'
 import { OrientDbRepository } from '../../repository/components/orientdb.component';
 import { RabbitMessageQueue } from '../../messaging/components/rabbitmq.component';
@@ -9,7 +11,7 @@ export class InfoPublisher implements Publisher {
 
     constructor(private mq: RabbitMessageQueue) { }
 
-    async publishMessage(response: any, headers: any = {}): Promise<boolean> {
-        return this.mq.sendMessage(this.patternString, response, headers);
+    async publishMessage(response: amqp.Message): Promise<boolean> {
+        return this.mq.sendMessage(this.patternString, response);
     }
 }
