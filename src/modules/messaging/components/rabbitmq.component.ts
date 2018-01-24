@@ -18,8 +18,9 @@ export class RabbitMessageQueue {
 
         try {
             await this.initializeConnection();
+            await this.ensureInfrastructure();
         } catch (error) {
-            
+            console.log(`Error initializing connection / ensuring infrastructure: ${error}`);
         }
     }
 

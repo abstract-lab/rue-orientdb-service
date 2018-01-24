@@ -5,9 +5,9 @@ import { InfoModule } from './info/info.module';
 
 @Module({
     modules: [
-        InfoModule,
         RepositoryModule,
-        MessagingModule
+        MessagingModule,
+        InfoModule
     ]
 })
 export class MainModule { }

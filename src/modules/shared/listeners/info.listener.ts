@@ -10,7 +10,10 @@ export class InfoListener implements Listener {
         let result: boolean = false;
 
         if(msg) {
-
+            const dbs = await this.repository.testDb();
+            
+            dbs.forEach(db => console.log(`Found: ${db} database`));
+            result = true;
         }
 
         return Promise.resolve(result);
