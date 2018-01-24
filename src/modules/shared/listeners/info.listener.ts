@@ -1,21 +1,19 @@
 import { Listener } from '../common/listener'
+import { Consumer } from '../common/consumer';
 import { OrientDbRepository } from '../../repository/components/orientdb.component';
+import { RabbitMessageQueue } from '../../messaging/components/rabbitmq.component';
+import { InfoService } from '../../info/components/info.service';
 
 export class InfoListener implements Listener {
-    readonly queueName: string = 'info';
-    readonly patternString: string = '*.*.info';
 
-    constructor(private repository: OrientDbRepository) { }
-    async onMessageReceived(msg: any): Promise<boolean> {
-        let result: boolean = false;
+    readonly queueName: string = 'info-request';
+    readonly patternString: string = 'request.info.*';
+    readonly consumeMessage: boolean = true;
+    constructor(private consumer: InfoService) { }
 
-        if(msg) {
-            const dbs = await this.repository.testDb();
-            
-            dbs.forEach(db => console.log(`Found: ${db} database`));
-            result = true;
-        }
+    async onMessageReceived(msg: any): Promise<any> {
+        const result = await this.consumer.processMessage(msg);
 
-        return Promise.resolve(result);
+        return await this.consumer.processResult(result);
     }
 }

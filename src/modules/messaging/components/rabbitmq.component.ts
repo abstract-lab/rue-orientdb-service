@@ -4,21 +4,24 @@ import * as amqp from 'amqplib';
 import * as Config from '../../../config/config';
 import { Consumer } from '../../shared/common/consumer';
 import { Listener } from '../../shared/common/listener';
+import { Publisher } from '../../shared/common/publisher';
+import { Channel } from 'amqplib';
 
 @Component()
 export class RabbitMessageQueue {
     private connection: amqp.Connection;
-    private channel: amqp.Channel;
     private consumer: Consumer;
+    private channel: amqp.Channel;
 
     constructor(private url: string, private exchange: string) { }
 
-    public async acceptConsumer(consumer) {
+    public async acceptConsumer(consumer:Consumer) {
         this.consumer = consumer;
 
         try {
-            await this.initializeConnection();
-            await this.ensureInfrastructure();
+            this.channel = await this.initializeConnection();
+            await this.ensureInfrastructure(this.channel);
+            await this.bindChannel(this.channel);
         } catch (error) {
             console.log(`Error initializing connection / ensuring infrastructure: ${error}`);
         }
@@ -27,8 +30,6 @@ export class RabbitMessageQueue {
     public async sendMessage(routingKey: string, content: any, headers: {}): Promise<boolean> {
         let result = false;
 
-        await this.initializeConnection();
-
         result = this.channel.publish(this.exchange, routingKey, new Buffer(JSON.stringify(content)), {
             headers: headers
         });
@@ -36,44 +37,64 @@ export class RabbitMessageQueue {
         return Promise.resolve(result);
     }
 
-    private async ensureInfrastructure(): Promise<void> {
-        await this.channel.assertExchange(this.exchange, 'topic')
+    private async ensureInfrastructure(channel: amqp.Channel): Promise<boolean[]> {
+        let promises: Promise<boolean>[] = [];
 
-        if(this.consumer && this.consumer.listeners && this.consumer.listeners.length > 0) {
-            this.consumer.listeners.forEach(listener => this.ensureQueue(listener));
+        await channel.assertExchange(this.exchange, 'topic')
+
+        if(this.consumer) {
+            if(this.consumer.listeners && this.consumer.listeners.length > 0) {
+                this.consumer.listeners.map((listener: Listener) => {
+                    promises.push(this.ensureQueue(listener, channel));
+                });
+            }
+
+            if(this.consumer.publisher) {
+                promises.push(this.ensureQueue(this.consumer.publisher, channel));
+            };
         }
+
+        return Promise.all<boolean>(promises);
     }
 
-    private async ensureQueue(listener: Listener): Promise<boolean> {
-        const queueAssert = await this.channel.assertQueue(listener.queueName);
+    private async ensureQueue(queue: Listener | Publisher, channel: amqp.Channel): Promise<boolean> {
+        const queueAssert = await channel.assertQueue(queue.queueName);
 
         if(queueAssert.queue) {
-            await this.channel.bindQueue(listener.queueName, this.exchange, listener.patternString);
-
-            this.channel.consume(listener.queueName, (async(msg: amqp.Message | null) => {
-                if(msg) {
-                    const result = await listener.onMessageReceived(msg);
-                    result ? this.channel.ack(msg): this.channel.nack(msg);
-                }
-            }))
-
+            await channel.bindQueue(queue.queueName, this.exchange, queue.patternString);
             return Promise.resolve(true);
         }
 
         return Promise.resolve(false);
     }
 
-    private async initializeConnection(): Promise<void> {
+    private async bindChannel(channel: Channel): Promise<void> {
+        this.consumer.listeners.forEach((listener: Listener) => {
+            channel.consume(listener.queueName, (async(msg: amqp.Message | null) => {
+                if(msg) {
+                    const result = await listener.onMessageReceived(msg);
+
+                    if (result && listener.consumeMessage) {
+                        channel.ack(msg);
+                    } else {
+                        channel.nack(msg);
+                    }
+                }
+            }))
+        });
+    }
+
+    private async initializeConnection(): Promise<amqp.Channel> {
         let connectionAttempts: number = 1;
         let connected: boolean = false;
 
         while(!connected && connectionAttempts <= Config.Config.MQ_RETRY_POLICY.RETRY_COUNT) {
             try {
                 this.connection = await amqp.connect(this.url);
-                this.channel = await this.connection.createChannel();
-
                 connected = true;
                 console.log(`Successfully connected to url: ${this.url} after ${connectionAttempts} tries.`);
+
+                return this.connection.createChannel();
             } catch (error) {
                 console.log(`Attempt #${connectionAttempts} failed (error: ${error}). Waiting another ${Config.Config.MQ_RETRY_POLICY.RETRY_TIMEOUT} seconds ...`);
 
@@ -81,6 +102,8 @@ export class RabbitMessageQueue {
                 connectionAttempts ++;
             }
         }
+
+        return Promise.reject(null);
     }
 
     private wait(ms: number): Promise<void> {
