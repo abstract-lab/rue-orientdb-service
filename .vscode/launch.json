@@ -12,7 +12,15 @@
             "preLaunchTask": "tsc",
             "cwd": "${workspaceFolder}",
             "env": {
-                "NODE_PORT":"9901"
+                "NODE_PORT":"6601",
+                "MQ_HOST": "srv-ci-01",
+                "MQ_PORT": "5672",
+                "MQ_USERNAME": "rue-message-user",
+                "MQ_PASSWORD": "rU3$u53R",
+                "DB_HOST":"srv-ci-01",
+                "DB_PORT":"2424",
+                "DB_USERNAME":"root",
+                "DB_PASSWORD":"abcd1234&"
             },
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"

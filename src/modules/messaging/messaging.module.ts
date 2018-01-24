@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { Config } from '../../config/config';
 
-const rabbitMQ: MessageQueue
+import { Config } from '../../config/config';
+import { RabbitMessageQueue } from './components/rabbitmq.component';
+
+const rabbitMQ: RabbitMessageQueue = new RabbitMessageQueue(Config.getMQHost(), Config.getExchangeName());
 
 @Module({
-    components: [
-        { provide: OrientDbRepository, useValue: repository }
-    ],
-    exports: [
-        OrientDbRepository
-    ]
+    components: [{
+        provide: RabbitMessageQueue, useValue: rabbitMQ
+    }],
+    exports: [ RabbitMessageQueue ]
 })
 export class MessagingModule { }

@@ -18,7 +18,7 @@
   "homepage": "https://github.com/abstract-lab/rue-orientdb-service#readme",
   "dependencies": {
     "@nestjs/common": "^4.5.9",
-    "@nestjs/core": "^4.5.9",
+    "@nestjs/core": "^4.5.10",
     "@nestjs/microservices": "^4.5.8",
     "@nestjs/testing": "^4.5.5",
     "@nestjs/websockets": "^4.5.8",
